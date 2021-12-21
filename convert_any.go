@@ -229,9 +229,41 @@ func ConvertToTime(i interface{}, layout string) (time.Time, error) {
 	}
 }
 
+func ConvertToBytesSlice(i interface{}) ([][]byte, error) {
+	var s [][]byte
+	switch b := i.(type) {
+	case [][]byte:
+		return b, nil
+	case *[][]byte:
+		return *b, nil
+	case []string:
+		s = make([][]byte, 0, len(b))
+		for i := 0; i < len(b); i++ {
+			s = append(s, []byte(b[i]))
+		}
+		return s, nil
+	case *[]string:
+		return ConvertToBytesSlice(*b)
+	case []sql.RawBytes:
+		s = make([][]byte, 0, len(b))
+		for i := 0; i < len(b); i++ {
+			s = append(s, b[i])
+		}
+		return s, nil
+	case *sql.RawBytes:
+		return ConvertToBytesSlice(*b)
+	default:
+		return nil, ErrConvertFail
+	}
+}
+
 func ConvertToStrs(i interface{}) ([]string, error) {
 	var s []string
 	switch b := i.(type) {
+	case []string:
+		return b, nil
+	case *[]string:
+		return *b, nil
 	case [][]byte:
 		s = make([]string, 0, len(b))
 		for i := 0; i < len(b); i++ {
@@ -240,10 +272,6 @@ func ConvertToStrs(i interface{}) ([]string, error) {
 		return s, nil
 	case *[][]byte:
 		return ConvertToStrs(*b)
-	case []string:
-		return b, nil
-	case *[]string:
-		return *b, nil
 	case []sql.RawBytes:
 		s = make([]string, 0, len(b))
 		for i := 0; i < len(b); i++ {
@@ -257,53 +285,61 @@ func ConvertToStrs(i interface{}) ([]string, error) {
 	}
 }
 
-func ConvertToInts(i interface{}) ([]int, error) {
-	var s []int
-	switch b := i.(type) {
-	case [][]byte:
-		s = make([]int, 0, len(b))
-		for i := 0; i < len(b); i++ {
-			v, err := strconv.ParseInt(string(b[i]), 10, 0)
-			if err != nil {
-				return nil, err
-			}
-			s = append(s, int(v))
-		}
-		return s, nil
-	case *[][]byte:
-		return ConvertToInts(*b)
-	case []string:
-		s = make([]int, 0, len(b))
-		for i := 0; i < len(b); i++ {
-			v, err := strconv.ParseInt(b[i], 10, 0)
-			if err != nil {
-				return nil, err
-			}
-			s = append(s, int(v))
-		}
-		return s, nil
-	case *[]string:
-		return ConvertToInts(*b)
-	case []sql.RawBytes:
-		s = make([]int, 0, len(b))
-		for i := 0; i < len(b); i++ {
-			v, err := strconv.ParseInt(string(b[i]), 10, 0)
-			if err != nil {
-				return nil, err
-			}
-			s = append(s, int(v))
-		}
-		return s, nil
-	case *[]sql.RawBytes:
-		return ConvertToInts(*b)
-	default:
-		return nil, ErrConvertFail
+func ConvertToInt8s(i interface{}) ([]int8, error) {
+	s, err := ConvertToInt64s(i)
+	if err != nil {
+		return nil, err
 	}
+	t := make([]int8, 0, len(s))
+	for _, v := range s {
+		t = append(t, int8(v))
+	}
+	return t, nil
+}
+
+func ConvertToInt16s(i interface{}) ([]int16, error) {
+	s, err := ConvertToInt64s(i)
+	if err != nil {
+		return nil, err
+	}
+	t := make([]int16, 0, len(s))
+	for _, v := range s {
+		t = append(t, int16(v))
+	}
+	return t, nil
+}
+
+func ConvertToInts(i interface{}) ([]int, error) {
+	s, err := ConvertToInt64s(i)
+	if err != nil {
+		return nil, err
+	}
+	t := make([]int, 0, len(s))
+	for _, v := range s {
+		t = append(t, int(v))
+	}
+	return t, nil
+}
+
+func ConvertToInt32s(i interface{}) ([]int32, error) {
+	s, err := ConvertToInt64s(i)
+	if err != nil {
+		return nil, err
+	}
+	t := make([]int32, 0, len(s))
+	for _, v := range s {
+		t = append(t, int32(v))
+	}
+	return t, nil
 }
 
 func ConvertToInt64s(i interface{}) ([]int64, error) {
 	var s []int64
 	switch b := i.(type) {
+	case []int64:
+		return b, nil
+	case *[]int64:
+		return *b, nil
 	case [][]byte:
 		s = make([]int64, 0, len(b))
 		for i := 0; i < len(b); i++ {
@@ -340,6 +376,102 @@ func ConvertToInt64s(i interface{}) ([]int64, error) {
 		return s, nil
 	case *[]sql.RawBytes:
 		return ConvertToInt64s(*b)
+	default:
+		return nil, ErrConvertFail
+	}
+}
+
+func ConvertToUint8s(i interface{}) ([]uint8, error) {
+	s, err := ConvertToUint64s(i)
+	if err != nil {
+		return nil, err
+	}
+	t := make([]uint8, 0, len(s))
+	for _, v := range s {
+		t = append(t, uint8(v))
+	}
+	return t, nil
+}
+
+func ConvertToUint16s(i interface{}) ([]uint16, error) {
+	s, err := ConvertToUint64s(i)
+	if err != nil {
+		return nil, err
+	}
+	t := make([]uint16, 0, len(s))
+	for _, v := range s {
+		t = append(t, uint16(v))
+	}
+	return t, nil
+}
+
+func ConvertToUints(i interface{}) ([]uint, error) {
+	s, err := ConvertToUint64s(i)
+	if err != nil {
+		return nil, err
+	}
+	t := make([]uint, 0, len(s))
+	for _, v := range s {
+		t = append(t, uint(v))
+	}
+	return t, nil
+}
+
+func ConvertToUint32s(i interface{}) ([]uint32, error) {
+	s, err := ConvertToUint64s(i)
+	if err != nil {
+		return nil, err
+	}
+	t := make([]uint32, 0, len(s))
+	for _, v := range s {
+		t = append(t, uint32(v))
+	}
+	return t, nil
+}
+
+func ConvertToUint64s(i interface{}) ([]uint64, error) {
+	var s []uint64
+	switch b := i.(type) {
+	case []uint64:
+		return b, nil
+	case *[]uint64:
+		return *b, nil
+	case [][]byte:
+		s = make([]uint64, 0, len(b))
+		for i := 0; i < len(b); i++ {
+			v, err := strconv.ParseUint(string(b[i]), 10, 0)
+			if err != nil {
+				return nil, err
+			}
+			s = append(s, v)
+		}
+		return s, nil
+	case *[][]byte:
+		return ConvertToUint64s(*b)
+	case []string:
+		s = make([]uint64, 0, len(b))
+		for i := 0; i < len(b); i++ {
+			v, err := strconv.ParseUint(b[i], 10, 0)
+			if err != nil {
+				return nil, err
+			}
+			s = append(s, v)
+		}
+		return s, nil
+	case *[]string:
+		return ConvertToUint64s(*b)
+	case []sql.RawBytes:
+		s = make([]uint64, 0, len(b))
+		for i := 0; i < len(b); i++ {
+			v, err := strconv.ParseUint(string(b[i]), 10, 0)
+			if err != nil {
+				return nil, err
+			}
+			s = append(s, v)
+		}
+		return s, nil
+	case *[]sql.RawBytes:
+		return ConvertToUint64s(*b)
 	default:
 		return nil, ErrConvertFail
 	}
