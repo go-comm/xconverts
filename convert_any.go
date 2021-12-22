@@ -2,7 +2,6 @@ package xconverts
 
 import (
 	"database/sql"
-	"fmt"
 	"strconv"
 	"time"
 )
@@ -35,6 +34,10 @@ func ConvertToInt64(i interface{}) (int64, error) {
 		return int64(b), nil
 	}
 	switch b := i.(type) {
+	case float32:
+		return int64(b), nil
+	case float64:
+		return int64(b), nil
 	case string:
 		return ParseInt64(b)
 	case *string:
@@ -81,6 +84,10 @@ func ConvertToUint64(i interface{}) (uint64, error) {
 		return b, nil
 	}
 	switch b := i.(type) {
+	case float32:
+		return uint64(b), nil
+	case float64:
+		return uint64(b), nil
 	case string:
 		return ParseUint64(b)
 	case *string:
@@ -164,11 +171,17 @@ func ConvertToFloat64(i interface{}) (float64, error) {
 }
 
 func ConvertToStr(i interface{}) (string, error) {
+	if b, ok := IsInt(i); ok {
+		return FormatInt64(b), nil
+	}
+	if b, ok := IsUint(i); ok {
+		return FormatUint64(b), nil
+	}
 	switch b := i.(type) {
-	case int8, int16, int, int32, int64:
-		return fmt.Sprintf("%d", b), nil
-	case uint8, uint16, uint, uint32, uint64:
-		return fmt.Sprintf("%d", b), nil
+	case float32:
+		return formatFloat32(b), nil
+	case float64:
+		return formatFloat64(b), nil
 	case string:
 		return b, nil
 	case *string:

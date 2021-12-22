@@ -84,6 +84,20 @@ func Float64(x interface{}, err error) (float64, error) {
 	return ConvertToFloat64(x)
 }
 
+func Str(x interface{}, err error) (string, error) {
+	if err != nil {
+		return "", err
+	}
+	return ConvertToStr(x)
+}
+
+func Bytes(x interface{}, err error) ([]byte, error) {
+	if err != nil {
+		return nil, err
+	}
+	return ConvertToBytes(x)
+}
+
 func Strs(x interface{}, err error) ([]string, error) {
 	if err != nil {
 		return nil, err
