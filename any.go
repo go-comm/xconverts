@@ -278,6 +278,22 @@ func MustFloat64(x interface{}, def float64) float64 {
 	return v
 }
 
+func MustStr(x interface{}, def string) string {
+	v, err := ConvertToStr(x)
+	if err != nil {
+		return def
+	}
+	return v
+}
+
+func MustBytes(x interface{}, def []byte) []byte {
+	v, err := ConvertToBytes(x)
+	if err != nil {
+		return def
+	}
+	return v
+}
+
 func MustStrs(x interface{}, def []string) []string {
 	v, err := ConvertToStrs(x)
 	if err != nil {
